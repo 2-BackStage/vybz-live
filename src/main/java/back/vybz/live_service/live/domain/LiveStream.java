@@ -76,4 +76,9 @@ public class LiveStream {
         this.endTime = endTime;
     }
 
+    public void endLiveStream() {
+        this.liveStreamStatus = LiveStreamStatus.OFF_AIR;
+        this.endTime = Instant.now();
+    }
+
 }

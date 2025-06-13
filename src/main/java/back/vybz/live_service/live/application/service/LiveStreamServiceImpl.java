@@ -1,5 +1,8 @@
 package back.vybz.live_service.live.application.service;
 
+import back.vybz.live_service.common.exception.BaseException;
+import back.vybz.live_service.common.exception.BaseResponseStatus;
+import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.live.domain.LiveStream;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LiveStreamServiceImpl implements LiveStreamService{
 
     private final LiveStreamRepository liveStreamRepository;
+    private final LiveRedisService liveRedisService;
 
 
     @Override
@@ -31,6 +35,8 @@ public class LiveStreamServiceImpl implements LiveStreamService{
         LiveStream liveStream = newDto.toEntity();
         LiveStream saved = liveStreamRepository.save(liveStream);
 
+        liveRedisService.saveLiveStreamToRedis(saved);
+
         String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
 
         return ResponseAddLiveDto.builder()
@@ -39,6 +45,17 @@ public class LiveStreamServiceImpl implements LiveStreamService{
                 .hlsUrl(hlsUrl)
                 .liveStreamStatus(saved.getLiveStreamStatus())
                 .build();
+    }
+    @Override
+    @Transactional
+    public void endLiveStream(String buskerUuid, String streamKey){
+        LiveStream liveStream = liveStreamRepository.findByBuskerUuidAndStreamKey(buskerUuid, streamKey)
+                .orElseThrow(() -> new BaseException(BaseResponseStatus.LIVE_STREAM_NOT_FOUND));
+
+        liveStream.endLiveStream();
+        liveStreamRepository.save(liveStream);
+
+        liveRedisService.removeLiveStreamFromRedis(buskerUuid);
     }
 
 
