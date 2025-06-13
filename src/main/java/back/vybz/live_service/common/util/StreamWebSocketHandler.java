@@ -15,16 +15,26 @@ import java.nio.ByteBuffer;
 public class StreamWebSocketHandler extends BinaryWebSocketHandler {
 
     private final FfmpegProcessService ffmpegProcessService;
+    private final StreamKeyValidator streamKeyValidator;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
             String streamKey = getStreamKeyFromQuery(session);
+            System.out.println("👀 [DEBUG] validator = " + streamKeyValidator);
+
+            if (!streamKeyValidator.isValidStreamKey(streamKey)) {
+                System.err.println("❌ 유효하지 않은 streamKey: " + streamKey);
+                session.close(CloseStatus.NOT_ACCEPTABLE);
+                return;
+            }
+
             ffmpegProcessService.startFfmpeg(session, streamKey);
             System.out.println("✅ WebSocket 연결 성공 및 FFmpeg 프로세스 시작됨.");
         } catch (Exception e) {
-            System.err.println("❌ FFmpeg 실행 중 에러: " + e.getMessage());
+            System.err.println("❌ WebSocket 연결 중 에러: " + e.getMessage());
             e.printStackTrace();
+            session.close(CloseStatus.SERVER_ERROR);
         }
     }
 

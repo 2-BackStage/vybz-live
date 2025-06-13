@@ -52,6 +52,7 @@ public enum BaseResponseStatus {
     FAN_FEED_NOT_FOUND(HttpStatus.NOT_FOUND, false, 414, "존재하지 않는 팬 피드입니다."),
     NO_AUTHORIZATION_TO_UPDATE_FAN_FEED(HttpStatus.FORBIDDEN, false, 415, "이 팬 피드를 수정할 권한이 없습니다."),
     NO_AUTHORIZATION_TO_DELETE_FAN_FEED(HttpStatus.FORBIDDEN, false, 416, "이 팬 피드를 삭제할 권한이 없습니다."),
+    LIVE_STREAM_NOT_FOUND(HttpStatus.NOT_FOUND, false, 417, "존재하지 않는 라이브 스트림입니다."),
 
     /**
      * 500: 서버 에러

@@ -9,10 +9,7 @@ import back.vybz.live_service.live.vo.response.ResponseAddLiveVo;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/live")
@@ -33,6 +30,19 @@ public class LiveStreamController {
         RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
         ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());
+    }
+
+    @Operation(
+            summary = "라이브 스트림 종료 API",
+            description = "라이브 스트림을 종료하는 API입니다.",
+            tags = {"LIVE-SERVICE"}
+    )
+    @PostMapping("/end")
+    public BaseResponseEntity<Void> endLiveStream(HttpServletRequest httpServletRequest,
+                                                  @RequestParam("streamKey") String streamKey) {
+        String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
+        liveStreamService.endLiveStream(buskerUuid, streamKey);
+        return new BaseResponseEntity<>();
     }
 
 }
