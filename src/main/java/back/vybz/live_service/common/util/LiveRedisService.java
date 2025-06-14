@@ -60,7 +60,7 @@ public class LiveRedisService {
     }
 
     public Optional<LiveStream> getLiveStreamFromRedis(String streamKey) {
-        // 1. live:now에서 모든 buskerUuid 가져오기
+
         Set<String> buskerUuids = stringRedisTemplate.opsForSet().members(LIVE_NOW_KEY);
         if (buskerUuids == null) return Optional.empty();
 
@@ -79,6 +79,19 @@ public class LiveRedisService {
         }
         return Optional.empty();
     }
+
+    public void exitViewer(String streamKey, String viewerUuid) {
+        Long removed = stringRedisTemplate.opsForSet()
+                .remove("viewer:set:" + streamKey, viewerUuid);
+
+        if (removed != null && removed == 1L) {
+            stringRedisTemplate.opsForValue().decrement("viewer:count:" + streamKey);
+            System.out.println("👋 시청자 퇴장 처리 완료: " + viewerUuid);
+        } else {
+            System.out.println("⚠️ 퇴장 처리 대상 없음 또는 중복 퇴장: " + viewerUuid);
+        }
+    }
+
 
 
 }

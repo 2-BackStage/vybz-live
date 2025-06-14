@@ -1,5 +1,7 @@
 package back.vybz.live_service.common.util;
 
+import back.vybz.live_service.live.application.service.LiveStreamService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -12,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class ViewerWebSocketHandler extends TextWebSocketHandler {
 
     private final Map<String, List<WebSocketSession>> viewerSessions = new ConcurrentHashMap<>();
@@ -25,8 +28,14 @@ public class ViewerWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) {
+        String streamKey = extractStreamKey(webSocketSession);
+        String viewerUuid = extractViewerUuid(webSocketSession);
+
         viewerSessions.values().forEach(list -> list.remove(webSocketSession));
+        System.out.println("👋 시청자 퇴장: " + viewerUuid + " from " + streamKey);
+
     }
+
 
     public void notifyStreamEnded(String streamKey) {
         List<WebSocketSession> sessions = viewerSessions.getOrDefault(streamKey, List.of());
@@ -58,4 +67,16 @@ public class ViewerWebSocketHandler extends TextWebSocketHandler {
         }
         return null;
     }
+
+    private String extractViewerUuid(WebSocketSession session) {
+        String query = session.getUri().getQuery();
+        if (query == null) return null;
+        for (String param : query.split("&")) {
+            String[] kv = param.split("=");
+            if (kv.length == 2 && kv[0].equals("viewerUuid")) return kv[1];
+        }
+        return null;
+    }
+
+
 }

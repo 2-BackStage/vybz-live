@@ -90,6 +90,12 @@ public class LiveStreamServiceImpl implements LiveStreamService {
                 .hlsUrl(hlsUrl)
                 .build();
     }
+
+    @Override
+    @Transactional
+    public void existLiveStream(String streamKey, String viewerUuid){
+        liveRedisService.exitViewer(streamKey, viewerUuid);
+    }
 }
 
 

@@ -10,6 +10,7 @@ public interface LiveStreamService {
     ResponseAddLiveDto createLiveStream(RequestAddLiveDto requestAddLiveDto, String buskerUuid);
     void endLiveStream(String buskerUuid, String streamKey);
     EnterLiveStreamResponseDto enterLiveStream(EnterLiveStreamRequestDto enterLiveStreamRequestDto, String viewerUuid);
+    void existLiveStream(String streamKey, String viewerUuid);
 
 
 }

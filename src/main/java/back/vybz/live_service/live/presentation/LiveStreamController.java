@@ -62,4 +62,17 @@ public class LiveStreamController {
         EnterLiveStreamResponseDto enterLiveStreamResponseDto = liveStreamService.enterLiveStream(enterLiveStreamRequestDto, viewerUuid);
         return new BaseResponseEntity<>(enterLiveStreamResponseDto.toVo());
     }
+
+    @Operation(
+            summary = "라이브 스트림 퇴장 API",
+            description = "라이브 스트림에서 퇴장하는 API입니다.",
+            tags = {"LIVE-SERVICE"}
+    )
+    @PostMapping("/exit")
+    public BaseResponseEntity<Void> exitLiveStream(HttpServletRequest httpServletRequest,
+                                                   @RequestParam("streamKey") String streamKey) {
+        String viewerUuid = httpServletRequest.getHeader("X-User-Id");
+        liveStreamService.existLiveStream(streamKey, viewerUuid);
+        return new BaseResponseEntity<>();
+    }
 }
