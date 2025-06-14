@@ -1,5 +1,6 @@
 package back.vybz.live_service.common.config;
 
+import back.vybz.live_service.common.util.ViewerWebSocketHandler;
 import jakarta.websocket.server.ServerEndpointConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -18,10 +19,14 @@ import lombok.RequiredArgsConstructor;
 public class WebSocketConfig implements WebSocketConfigurer {
 
     private final StreamWebSocketHandler streamWebSocketHandler;
+    private final ViewerWebSocketHandler viewerWebSocketHandler;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(streamWebSocketHandler, "/ws/stream")
+                .setAllowedOrigins("*");
+
+        registry.addHandler(viewerWebSocketHandler, "/ws/viewer")
                 .setAllowedOrigins("*");
     }
 

@@ -4,8 +4,11 @@ import back.vybz.live_service.common.exception.BaseException;
 import back.vybz.live_service.common.exception.BaseResponseStatus;
 import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
+import back.vybz.live_service.common.util.ViewerWebSocketHandler;
 import back.vybz.live_service.live.domain.LiveStream;
+import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
+import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
 import back.vybz.live_service.live.infrastructure.LiveStreamRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LiveStreamServiceImpl implements LiveStreamService{
+public class LiveStreamServiceImpl implements LiveStreamService {
 
     private final LiveStreamRepository liveStreamRepository;
     private final LiveRedisService liveRedisService;
+    private final ViewerWebSocketHandler viewerWebSocketHandler;
 
 
     @Override
@@ -46,9 +50,10 @@ public class LiveStreamServiceImpl implements LiveStreamService{
                 .liveStreamStatus(saved.getLiveStreamStatus())
                 .build();
     }
+
     @Override
     @Transactional
-    public void endLiveStream(String buskerUuid, String streamKey){
+    public void endLiveStream(String buskerUuid, String streamKey) {
         LiveStream liveStream = liveStreamRepository.findByBuskerUuidAndStreamKey(buskerUuid, streamKey)
                 .orElseThrow(() -> new BaseException(BaseResponseStatus.LIVE_STREAM_NOT_FOUND));
 
@@ -56,7 +61,36 @@ public class LiveStreamServiceImpl implements LiveStreamService{
         liveStreamRepository.save(liveStream);
 
         liveRedisService.removeLiveStreamFromRedis(buskerUuid);
+        viewerWebSocketHandler.notifyStreamEnded(streamKey);
     }
 
+    @Override
+    @Transactional
+    public EnterLiveStreamResponseDto enterLiveStream(EnterLiveStreamRequestDto enterLiveStreamRequestDto, String viewerUuid) {
+        String streamKey = enterLiveStreamRequestDto.getStreamKey();
 
+        LiveStream liveStream = liveRedisService.getLiveStreamFromRedis(streamKey)
+                .orElseThrow(() -> new BaseException(BaseResponseStatus.LIVE_STREAM_NOT_FOUND));
+
+        boolean isAlreadyWatching = liveRedisService.isViewerAlreadyWatching(streamKey, viewerUuid);
+
+        if (!isAlreadyWatching) {
+            liveRedisService.enterViewer(streamKey, viewerUuid);
+        }
+
+        int viewerCount = liveRedisService.getViewerCount(streamKey);
+
+        String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
+
+        return EnterLiveStreamResponseDto.builder()
+                .title(liveStream.getTitle())
+                .buskerUuid(liveStream.getBuskerUuid())
+                .viewerCount(viewerCount)
+                .isAlreadyWatching(isAlreadyWatching)
+                .hlsUrl(hlsUrl)
+                .build();
+    }
 }
+
+
+

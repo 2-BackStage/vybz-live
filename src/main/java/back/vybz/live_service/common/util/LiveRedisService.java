@@ -1,12 +1,16 @@
 package back.vybz.live_service.common.util;
 
 import back.vybz.live_service.live.domain.LiveStream;
+import back.vybz.live_service.live.domain.LiveStreamStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -37,4 +41,44 @@ public class LiveRedisService {
         stringRedisTemplate.opsForSet().remove("live:now", buskerUuid);
         stringRedisTemplate.delete("live:busker:" + buskerUuid);
     }
+
+    public boolean isViewerAlreadyWatching(String streamKey, String viewerUuid) {
+        return Boolean.TRUE.equals(stringRedisTemplate.opsForSet()
+                .isMember("viewer:set:" + streamKey, viewerUuid));
+    }
+
+    public void enterViewer(String streamKey, String viewerUuid) {
+        Long added = stringRedisTemplate.opsForSet().add("viewer:set:" + streamKey, viewerUuid);
+        if (added != null && added == 1L) {
+            stringRedisTemplate.opsForValue().increment("viewer:count:" + streamKey);
+        }
+    }
+
+    public int getViewerCount(String streamKey) {
+        String count = stringRedisTemplate.opsForValue().get("viewer:count:" + streamKey);
+        return count != null ? Integer.parseInt(count) : 0;
+    }
+
+    public Optional<LiveStream> getLiveStreamFromRedis(String streamKey) {
+        // 1. live:now에서 모든 buskerUuid 가져오기
+        Set<String> buskerUuids = stringRedisTemplate.opsForSet().members(LIVE_NOW_KEY);
+        if (buskerUuids == null) return Optional.empty();
+
+        for (String buskerUuid : buskerUuids) {
+            Map<Object, Object> hash = stringRedisTemplate.opsForHash().entries(BUSKER_KEY_PREFIX + buskerUuid);
+            if (hash != null && streamKey.equals(hash.get("streamKey"))) {
+                return Optional.of(LiveStream.builder()
+                        .buskerUuid(buskerUuid)
+                        .streamKey((String) hash.get("streamKey"))
+                        .title((String) hash.get("title"))
+                        .thumbnailUrl((String) hash.get("thumbnailUrl"))
+                        .startTime(Instant.parse((String) hash.get("startedAt")))
+                        .liveStreamStatus(LiveStreamStatus.valueOf((String) hash.get("status")))
+                        .build());
+            }
+        }
+        return Optional.empty();
+    }
+
+
 }

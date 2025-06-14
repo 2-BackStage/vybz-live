@@ -16,6 +16,7 @@ public class StreamWebSocketHandler extends BinaryWebSocketHandler {
 
     private final FfmpegProcessService ffmpegProcessService;
     private final StreamKeyValidator streamKeyValidator;
+    private final ViewerWebSocketHandler viewerWebSocketHandler;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
@@ -52,6 +53,9 @@ public class StreamWebSocketHandler extends BinaryWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         System.out.println("🛑 [SERVER] WebSocket 연결 종료: " + status);
         ffmpegProcessService.stopFfmpeg();
+
+        String streamKey = getStreamKeyFromQuery(session);
+        viewerWebSocketHandler.notifyStreamEnded(streamKey);
     }
 
     private String getStreamKeyFromQuery(WebSocketSession webSocketSession) {
