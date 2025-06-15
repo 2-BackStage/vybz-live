@@ -2,9 +2,13 @@ package back.vybz.live_service.live.presentation;
 
 import back.vybz.live_service.common.entity.BaseResponseEntity;
 import back.vybz.live_service.live.application.service.LiveStreamService;
+import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
+import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
+import back.vybz.live_service.live.vo.request.EnterLiveStreamRequestVo;
 import back.vybz.live_service.live.vo.request.RequestAddLiveVo;
+import back.vybz.live_service.live.vo.response.EnterLiveStreamResponseVo;
 import back.vybz.live_service.live.vo.response.ResponseAddLiveVo;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,4 +49,30 @@ public class LiveStreamController {
         return new BaseResponseEntity<>();
     }
 
+    @Operation(
+            summary = "라이브 스트림 입장 API",
+            description = "라이브 스트림에 입장하는 API입니다.",
+            tags = {"LIVE-SERVICE"}
+    )
+    @PostMapping("/enter")
+    public BaseResponseEntity<EnterLiveStreamResponseVo> enterLiveStream(HttpServletRequest httpServletRequest,
+                                                                         @RequestBody EnterLiveStreamRequestVo enterLiveStreamRequestVo) {
+        String viewerUuid = httpServletRequest.getHeader("X-User-Id");
+        EnterLiveStreamRequestDto enterLiveStreamRequestDto = new EnterLiveStreamRequestDto(enterLiveStreamRequestVo.getStreamKey(), viewerUuid);
+        EnterLiveStreamResponseDto enterLiveStreamResponseDto = liveStreamService.enterLiveStream(enterLiveStreamRequestDto, viewerUuid);
+        return new BaseResponseEntity<>(enterLiveStreamResponseDto.toVo());
+    }
+
+    @Operation(
+            summary = "라이브 스트림 퇴장 API",
+            description = "라이브 스트림에서 퇴장하는 API입니다.",
+            tags = {"LIVE-SERVICE"}
+    )
+    @PostMapping("/exit")
+    public BaseResponseEntity<Void> exitLiveStream(HttpServletRequest httpServletRequest,
+                                                   @RequestParam("streamKey") String streamKey) {
+        String viewerUuid = httpServletRequest.getHeader("X-User-Id");
+        liveStreamService.existLiveStream(streamKey, viewerUuid);
+        return new BaseResponseEntity<>();
+    }
 }
