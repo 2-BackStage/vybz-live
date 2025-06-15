@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "busker-info-service")
 public interface BuskerFeignClient {
-
-    @GetMapping("/api/v1/busker-category/{buskerUuid}/category")
+    @GetMapping("/busker-info-service/api/v1/busker-category/{buskerUuid}/category")
     BaseResponseEntity<BuskerCategoryResponseDto> getMainCategoryByBusker(@PathVariable("buskerUuid") String buskerUuid);
 }
 

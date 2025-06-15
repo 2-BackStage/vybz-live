@@ -9,10 +9,13 @@ import lombok.NoArgsConstructor;
 public class RequestAddLiveVo {
 
     private String title;
+    private Long categoryId;
 
     @Builder
-    public RequestAddLiveVo(String title) {
+    public RequestAddLiveVo(String title,
+                            Long categoryId) {
         this.title = title;
+        this.categoryId = categoryId;
     }
 
 }

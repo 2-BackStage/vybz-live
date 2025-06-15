@@ -1,11 +1,13 @@
 package back.vybz.live_service.common.entity;
 
 import back.vybz.live_service.common.exception.BaseResponseStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 public record BaseResponseEntity<T>(
+        @JsonIgnore
         @Schema(hidden = true) HttpStatusCode httpStatus,
         Boolean isSuccess,
         String message,
@@ -68,10 +70,8 @@ public record BaseResponseEntity<T>(
         return new BaseResponseEntity<>(status, message);
     }
 
-    // ✅ 실패 응답 (오류 데이터 포함) -- 이 메서드를 추가하는 것을 강력히 권장합니다!
+    // ✅ 실패 응답 (오류 데이터 포함)
     public static <T> BaseResponseEntity<T> failWithResult(BaseResponseStatus status, T result) {
-        // 실패 상태이므로 isSuccess는 false여야 합니다.
-        // BaseResponseStatus에서 isSuccess를 정확히 관리해야 합니다.
         return new BaseResponseEntity<>(status.getHttpStatusCode(), status.isSuccess(), status.getMessage(), status.getCode(), result);
     }
 }

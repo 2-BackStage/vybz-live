@@ -2,6 +2,7 @@ package back.vybz.live_service.live.application.service;
 
 import back.vybz.live_service.common.exception.BaseException;
 import back.vybz.live_service.common.exception.BaseResponseStatus;
+import back.vybz.live_service.common.util.CursorPage;
 import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.common.util.ViewerWebSocketHandler;
@@ -9,14 +10,17 @@ import back.vybz.live_service.live.domain.LiveStream;
 import back.vybz.live_service.live.domain.LiveStreamStatus;
 import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
+import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
 import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
+import back.vybz.live_service.live.dto.response.ScrollLiveResponseDto;
 import back.vybz.live_service.live.infrastructure.LiveStreamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -104,8 +108,50 @@ public class LiveStreamServiceImpl implements LiveStreamService {
 
     @Override
     @Transactional
-    public void existLiveStream(String streamKey, String viewerUuid){
+    public void existLiveStream(String streamKey, String viewerUuid) {
         liveRedisService.exitViewer(streamKey, viewerUuid);
+    }
+
+    @Override
+    public ScrollLiveResponseDto getLiveStreamScrollList(ScrollLiveRequestDto scrollLiveRequestDto) {
+        String cursor = scrollLiveRequestDto.getLastId();
+
+        List<LiveStream> liveStreams = liveStreamRepository.findLiveStreamAllWithScroll(
+                cursor,
+                scrollLiveRequestDto.getSize()
+        );
+
+        CursorPage<LiveStream> cursorPage = CursorPage.of(
+                liveStreams,
+                scrollLiveRequestDto.getSize(),
+                LiveStream::getId
+        );
+
+        return ScrollLiveResponseDto.from(cursorPage);
+    }
+
+    @Override
+    public ScrollLiveResponseDto getLiveStreamScrollListByCategory(ScrollLiveRequestDto scrollLiveRequestDto) {
+        String cursor = scrollLiveRequestDto.getLastId();
+        Long categoryId = scrollLiveRequestDto.getCategoryId();
+
+        if (categoryId == null) {
+            throw new BaseException(BaseResponseStatus.INVALID_REQUEST);
+        }
+
+        List<LiveStream> liveStreams = liveStreamRepository.findLiveStreamWithScroll(
+                cursor,
+                categoryId,
+                scrollLiveRequestDto.getSize()
+        );
+
+        CursorPage<LiveStream> cursorPage = CursorPage.of(
+                liveStreams,
+                scrollLiveRequestDto.getSize(),
+                LiveStream::getId
+        );
+
+        return ScrollLiveResponseDto.from(cursorPage);
     }
 }
 
