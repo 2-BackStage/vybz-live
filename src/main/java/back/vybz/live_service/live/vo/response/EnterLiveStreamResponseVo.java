@@ -13,17 +13,20 @@ public class EnterLiveStreamResponseVo {
     private int viewerCount;
     private boolean isAlreadyWatching;
     private String hlsUrl;
+    private Long categoryId;
 
     @Builder
     public EnterLiveStreamResponseVo(String title,
                                       String buskerUuid,
                                       int viewerCount,
                                       boolean isAlreadyWatching,
-                                      String hlsUrl) {
+                                      String hlsUrl,
+                                     Long categoryId) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.viewerCount = viewerCount;
         this.isAlreadyWatching = isAlreadyWatching;
         this.hlsUrl = hlsUrl;
+        this.categoryId = categoryId;
     }
 }

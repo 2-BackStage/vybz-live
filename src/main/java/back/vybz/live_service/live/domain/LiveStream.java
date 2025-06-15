@@ -39,6 +39,9 @@ public class LiveStream {
     //시청자 수
     private int viewerCount;
 
+    //카테고리 ID
+    private Long categoryId;
+
     //방송 시작 시간
     private Instant startTime;
 
@@ -62,6 +65,7 @@ public class LiveStream {
                       LiveStreamStatus liveStreamStatus,
                       int likeCount,
                       int viewerCount,
+                      Long categoryId,
                       Instant startTime,
                       Instant endTime) {
         this.id = id;
@@ -72,6 +76,7 @@ public class LiveStream {
         this.liveStreamStatus = liveStreamStatus;
         this.likeCount = likeCount;
         this.viewerCount = viewerCount;
+        this.categoryId = categoryId;
         this.startTime = startTime;
         this.endTime = endTime;
     }

@@ -6,6 +6,7 @@ import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.common.util.ViewerWebSocketHandler;
 import back.vybz.live_service.live.domain.LiveStream;
+import back.vybz.live_service.live.domain.LiveStreamStatus;
 import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
 import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class LiveStreamServiceImpl implements LiveStreamService {
@@ -22,23 +25,29 @@ public class LiveStreamServiceImpl implements LiveStreamService {
     private final LiveStreamRepository liveStreamRepository;
     private final LiveRedisService liveRedisService;
     private final ViewerWebSocketHandler viewerWebSocketHandler;
+    private final BuskerFeignClient buskerFeignClient;
 
 
-    @Override
     @Transactional
+    @Override
     public ResponseAddLiveDto createLiveStream(RequestAddLiveDto requestAddLiveDto, String buskerUuid) {
         String streamKey = StreamKeyGenerator.generate();
 
+        Long categoryId = buskerFeignClient.getMainCategoryByBusker(buskerUuid).result().getCategoryId();
 
-        RequestAddLiveDto newDto = RequestAddLiveDto.builder()
-                .title(requestAddLiveDto.getTitle())
+        LiveStream liveStream = LiveStream.builder()
                 .buskerUuid(buskerUuid)
+                .title(requestAddLiveDto.getTitle())
                 .streamKey(streamKey)
+                .liveStreamStatus(LiveStreamStatus.ON_AIR)
+                .categoryId(categoryId)
+                .startTime(Instant.now())
+                .likeCount(0)
+                .viewerCount(0)
                 .build();
 
-        LiveStream liveStream = newDto.toEntity();
-        LiveStream saved = liveStreamRepository.save(liveStream);
 
+        LiveStream saved = liveStreamRepository.save(liveStream);
         liveRedisService.saveLiveStreamToRedis(saved);
 
         String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
@@ -48,8 +57,10 @@ public class LiveStreamServiceImpl implements LiveStreamService {
                 .streamKey(saved.getStreamKey())
                 .hlsUrl(hlsUrl)
                 .liveStreamStatus(saved.getLiveStreamStatus())
+                .categoryId(saved.getCategoryId())
                 .build();
     }
+
 
     @Override
     @Transactional
