@@ -2,18 +2,25 @@ package back.vybz.live_service.live.application.service;
 
 import back.vybz.live_service.common.exception.BaseException;
 import back.vybz.live_service.common.exception.BaseResponseStatus;
+import back.vybz.live_service.common.util.CursorPage;
 import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.common.util.ViewerWebSocketHandler;
 import back.vybz.live_service.live.domain.LiveStream;
+import back.vybz.live_service.live.domain.LiveStreamStatus;
 import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
+import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
 import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
+import back.vybz.live_service.live.dto.response.ScrollLiveResponseDto;
 import back.vybz.live_service.live.infrastructure.LiveStreamRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,23 +29,29 @@ public class LiveStreamServiceImpl implements LiveStreamService {
     private final LiveStreamRepository liveStreamRepository;
     private final LiveRedisService liveRedisService;
     private final ViewerWebSocketHandler viewerWebSocketHandler;
+    private final BuskerFeignClient buskerFeignClient;
 
 
-    @Override
     @Transactional
+    @Override
     public ResponseAddLiveDto createLiveStream(RequestAddLiveDto requestAddLiveDto, String buskerUuid) {
         String streamKey = StreamKeyGenerator.generate();
 
+        Long categoryId = buskerFeignClient.getMainCategoryByBusker(buskerUuid).result().getCategoryId();
 
-        RequestAddLiveDto newDto = RequestAddLiveDto.builder()
-                .title(requestAddLiveDto.getTitle())
+        LiveStream liveStream = LiveStream.builder()
                 .buskerUuid(buskerUuid)
+                .title(requestAddLiveDto.getTitle())
                 .streamKey(streamKey)
+                .liveStreamStatus(LiveStreamStatus.ON_AIR)
+                .categoryId(categoryId)
+                .startTime(Instant.now())
+                .likeCount(0)
+                .viewerCount(0)
                 .build();
 
-        LiveStream liveStream = newDto.toEntity();
-        LiveStream saved = liveStreamRepository.save(liveStream);
 
+        LiveStream saved = liveStreamRepository.save(liveStream);
         liveRedisService.saveLiveStreamToRedis(saved);
 
         String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
@@ -48,8 +61,10 @@ public class LiveStreamServiceImpl implements LiveStreamService {
                 .streamKey(saved.getStreamKey())
                 .hlsUrl(hlsUrl)
                 .liveStreamStatus(saved.getLiveStreamStatus())
+                .categoryId(saved.getCategoryId())
                 .build();
     }
+
 
     @Override
     @Transactional
@@ -93,8 +108,50 @@ public class LiveStreamServiceImpl implements LiveStreamService {
 
     @Override
     @Transactional
-    public void existLiveStream(String streamKey, String viewerUuid){
+    public void existLiveStream(String streamKey, String viewerUuid) {
         liveRedisService.exitViewer(streamKey, viewerUuid);
+    }
+
+    @Override
+    public ScrollLiveResponseDto getLiveStreamScrollList(ScrollLiveRequestDto scrollLiveRequestDto) {
+        String cursor = scrollLiveRequestDto.getLastId();
+
+        List<LiveStream> liveStreams = liveStreamRepository.findLiveStreamAllWithScroll(
+                cursor,
+                scrollLiveRequestDto.getSize()
+        );
+
+        CursorPage<LiveStream> cursorPage = CursorPage.of(
+                liveStreams,
+                scrollLiveRequestDto.getSize(),
+                LiveStream::getId
+        );
+
+        return ScrollLiveResponseDto.from(cursorPage);
+    }
+
+    @Override
+    public ScrollLiveResponseDto getLiveStreamScrollListByCategory(ScrollLiveRequestDto scrollLiveRequestDto) {
+        String cursor = scrollLiveRequestDto.getLastId();
+        Long categoryId = scrollLiveRequestDto.getCategoryId();
+
+        if (categoryId == null) {
+            throw new BaseException(BaseResponseStatus.INVALID_REQUEST);
+        }
+
+        List<LiveStream> liveStreams = liveStreamRepository.findLiveStreamWithScroll(
+                cursor,
+                categoryId,
+                scrollLiveRequestDto.getSize()
+        );
+
+        CursorPage<LiveStream> cursorPage = CursorPage.of(
+                liveStreams,
+                scrollLiveRequestDto.getSize(),
+                LiveStream::getId
+        );
+
+        return ScrollLiveResponseDto.from(cursorPage);
     }
 }
 

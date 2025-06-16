@@ -32,6 +32,7 @@ public class LiveRedisService {
         streamInfo.put("thumbnailUrl", liveStream.getThumbnailUrl() == null ? "" : liveStream.getThumbnailUrl());
         streamInfo.put("startedAt", liveStream.getStartTime().toString());
         streamInfo.put("status", liveStream.getLiveStreamStatus().name());
+        streamInfo.put("categoryId", liveStream.getCategoryId() == null ? "" : liveStream.getCategoryId().toString());
 
         stringRedisTemplate.opsForHash().putAll(BUSKER_KEY_PREFIX + buskerUuid, streamInfo);
 
@@ -74,6 +75,7 @@ public class LiveRedisService {
                         .thumbnailUrl((String) hash.get("thumbnailUrl"))
                         .startTime(Instant.parse((String) hash.get("startedAt")))
                         .liveStreamStatus(LiveStreamStatus.valueOf((String) hash.get("status")))
+                        .categoryId(Long.valueOf((String) hash.get("categoryId")))
                         .build());
             }
         }
