@@ -1,6 +1,7 @@
 package back.vybz.live_service.common.util;
 
 import back.vybz.live_service.live.application.service.LiveStreamService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -12,12 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
 public class ViewerWebSocketHandler extends TextWebSocketHandler {
 
     private final Map<String, List<WebSocketSession>> viewerSessions = new ConcurrentHashMap<>();
+    private final LiveLikeRedisReader liveLikeRedisReader;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) {
@@ -56,6 +60,44 @@ public class ViewerWebSocketHandler extends TextWebSocketHandler {
         }
 
         viewerSessions.remove(streamKey);
+    }
+
+    public void pushLikeCount(String streamKey, Long likeCount) {
+        List<WebSocketSession> sessions = viewerSessions.getOrDefault(streamKey, List.of());
+
+        for (WebSocketSession session : sessions) {
+            try {
+                String json = String.format("{\"type\": \"LIKE_COUNT\", \"likeCount\": %d}", likeCount);
+                session.sendMessage(new TextMessage(json));
+                System.out.println("👍 좋아요 수 push: " + likeCount + " to session: " + session.getId());
+            } catch (Exception e) {
+                System.err.println("❌ 좋아요 WebSocket 메시지 실패: " + e.getMessage());
+            }
+        }
+    }
+
+    @PostConstruct
+    public void startLikeBroadcastScheduler() {
+        Executors.newSingleThreadScheduledExecutor()
+                .scheduleAtFixedRate(this::broadcastLikesToAllViewers, 0, 3, TimeUnit.SECONDS);
+    }
+
+    private void broadcastLikesToAllViewers() {
+        for (Map.Entry<String, List<WebSocketSession>> entry : viewerSessions.entrySet()) {
+            String streamKey = entry.getKey();
+            List<WebSocketSession> sessions = entry.getValue();
+
+            long likeCount = liveLikeRedisReader.getLikeCount(streamKey);
+
+            List<WebSocketSession> copy = new ArrayList<>(sessions);
+            for (WebSocketSession session : copy) {
+                try {
+                    session.sendMessage(new TextMessage("likeCount:" + likeCount));
+                } catch (Exception e) {
+                    System.err.println("❌ 좋아요 전송 실패: " + e.getMessage());
+                }
+            }
+        }
     }
 
     private String extractStreamKey(WebSocketSession session) {
