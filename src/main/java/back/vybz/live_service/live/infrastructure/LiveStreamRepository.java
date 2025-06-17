@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface LiveStreamRepository extends MongoRepository<LiveStream,String>, LiveStreamRepositoryCustom {
 
     Optional<LiveStream> findByBuskerUuidAndStreamKey(String buskerUuid, String streamKey);
+    Optional<LiveStream> findByStreamKey(String streamKey);
 }
