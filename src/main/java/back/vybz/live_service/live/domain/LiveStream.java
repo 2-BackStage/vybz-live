@@ -86,4 +86,9 @@ public class LiveStream {
         this.endTime = Instant.now();
     }
 
+    public void updateLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
+
 }
