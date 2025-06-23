@@ -8,10 +8,10 @@ import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.common.util.ViewerWebSocketHandler;
 import back.vybz.live_service.live.domain.LiveStream;
 import back.vybz.live_service.live.domain.LiveStreamStatus;
-import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
+import back.vybz.live_service.live.dto.request.LiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
 import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
-import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
+import back.vybz.live_service.live.dto.response.LiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
 import back.vybz.live_service.live.dto.response.ScrollLiveResponseDto;
 import back.vybz.live_service.live.infrastructure.LiveStreamRepository;
@@ -80,30 +80,23 @@ public class LiveStreamServiceImpl implements LiveStreamService {
     }
 
     @Override
-    @Transactional
-    public EnterLiveStreamResponseDto enterLiveStream(EnterLiveStreamRequestDto enterLiveStreamRequestDto, String viewerUuid) {
-        String streamKey = enterLiveStreamRequestDto.getStreamKey();
+    public LiveStreamResponseDto getLiveStream(String streamKey, String viewerUuid) {
 
         LiveStream liveStream = liveRedisService.getLiveStreamFromRedis(streamKey)
                 .orElseThrow(() -> new BaseException(BaseResponseStatus.LIVE_STREAM_NOT_FOUND));
 
-        boolean isAlreadyWatching = liveRedisService.isViewerAlreadyWatching(streamKey, viewerUuid);
+//        String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
 
-        if (!isAlreadyWatching) {
-            liveRedisService.enterViewer(streamKey, viewerUuid);
-        }
+//        kafka viewCount topic produce
 
-        int viewerCount = liveRedisService.getViewerCount(streamKey);
-
-        String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
-
-        return EnterLiveStreamResponseDto.builder()
+        return LiveStreamResponseDto.builder()
                 .title(liveStream.getTitle())
                 .buskerUuid(liveStream.getBuskerUuid())
-                .viewerCount(viewerCount)
-                .isAlreadyWatching(isAlreadyWatching)
-                .hlsUrl(hlsUrl)
+                .likeCount(liveStream.getLikeCount())
+                .viewerCount(liveStream.getViewerCount()+1)
+                .hlsUrl(streamKey)
                 .build();
+
     }
 
     @Override

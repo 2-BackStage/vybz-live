@@ -6,14 +6,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class EnterLiveStreamRequestVo {
+public class LiveStreamRequestVo {
 
     private String streamKey;
     private String viewerUuid;
 
     @Builder
-    public EnterLiveStreamRequestVo(String streamKey,
-                                    String viewerUuid) {
+    public LiveStreamRequestVo(String streamKey,
+                               String viewerUuid) {
         this.streamKey = streamKey;
         this.viewerUuid = viewerUuid;
     }

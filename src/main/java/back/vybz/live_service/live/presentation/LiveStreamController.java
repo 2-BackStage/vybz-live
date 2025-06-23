@@ -2,15 +2,15 @@ package back.vybz.live_service.live.presentation;
 
 import back.vybz.live_service.common.entity.BaseResponseEntity;
 import back.vybz.live_service.live.application.service.LiveStreamService;
-import back.vybz.live_service.live.dto.request.EnterLiveStreamRequestDto;
+import back.vybz.live_service.live.dto.request.LiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
 import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
-import back.vybz.live_service.live.dto.response.EnterLiveStreamResponseDto;
+import back.vybz.live_service.live.dto.response.LiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
 import back.vybz.live_service.live.dto.response.ScrollLiveResponseDto;
-import back.vybz.live_service.live.vo.request.EnterLiveStreamRequestVo;
+import back.vybz.live_service.live.vo.request.LiveStreamRequestVo;
 import back.vybz.live_service.live.vo.request.RequestAddLiveVo;
-import back.vybz.live_service.live.vo.response.EnterLiveStreamResponseVo;
+import back.vybz.live_service.live.vo.response.LiveStreamResponseVo;
 import back.vybz.live_service.live.vo.response.ResponseAddLiveVo;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,13 +56,12 @@ public class LiveStreamController {
             description = "라이브 스트림에 입장하는 API입니다.",
             tags = {"LIVE-SERVICE"}
     )
-    @PostMapping("/enter")
-    public BaseResponseEntity<EnterLiveStreamResponseVo> enterLiveStream(HttpServletRequest httpServletRequest,
-                                                                         @RequestBody EnterLiveStreamRequestVo enterLiveStreamRequestVo) {
+    @GetMapping("/enter/{streamKey}")
+    public BaseResponseEntity<LiveStreamResponseVo> enterLiveStream(HttpServletRequest httpServletRequest,
+                                                                    @PathVariable("streamKey") String streamKey) {
         String viewerUuid = httpServletRequest.getHeader("X-User-Id");
-        EnterLiveStreamRequestDto enterLiveStreamRequestDto = new EnterLiveStreamRequestDto(enterLiveStreamRequestVo.getStreamKey(), viewerUuid);
-        EnterLiveStreamResponseDto enterLiveStreamResponseDto = liveStreamService.enterLiveStream(enterLiveStreamRequestDto, viewerUuid);
-        return new BaseResponseEntity<>(enterLiveStreamResponseDto.toVo());
+        LiveStreamResponseDto liveStreamResponseDto = liveStreamService.getLiveStream(streamKey, viewerUuid);
+        return new BaseResponseEntity<>(liveStreamResponseDto.toVo());
     }
 
     @Operation(
