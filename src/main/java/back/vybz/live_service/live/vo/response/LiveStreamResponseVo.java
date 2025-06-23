@@ -6,27 +6,28 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class EnterLiveStreamResponseVo {
+public class LiveStreamResponseVo {
 
     private String title;
     private String buskerUuid;
+    private int likeCount;
     private int viewerCount;
-    private boolean isAlreadyWatching;
     private String hlsUrl;
     private Long categoryId;
 
     @Builder
-    public EnterLiveStreamResponseVo(String title,
+    public LiveStreamResponseVo(String title,
                                       String buskerUuid,
+                                        int likeCount,
                                       int viewerCount,
-                                      boolean isAlreadyWatching,
                                       String hlsUrl,
                                      Long categoryId) {
         this.title = title;
         this.buskerUuid = buskerUuid;
+        this.likeCount = likeCount;
         this.viewerCount = viewerCount;
-        this.isAlreadyWatching = isAlreadyWatching;
         this.hlsUrl = hlsUrl;
         this.categoryId = categoryId;
     }
+
 }

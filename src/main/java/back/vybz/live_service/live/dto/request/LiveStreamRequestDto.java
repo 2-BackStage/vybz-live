@@ -6,20 +6,20 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class EnterLiveStreamRequestDto {
+public class LiveStreamRequestDto {
 
     private String streamKey;
     private String viewerUuid;
 
     @Builder
-    public EnterLiveStreamRequestDto(String streamKey,
-                                     String viewerUuid) {
+    public LiveStreamRequestDto(String streamKey,
+                                String viewerUuid) {
         this.streamKey = streamKey;
         this.viewerUuid = viewerUuid;
     }
 
-    public EnterLiveStreamRequestDto from(String streamKey, String viewerUuid) {
-        return EnterLiveStreamRequestDto.builder()
+    public LiveStreamRequestDto from(String streamKey, String viewerUuid) {
+        return LiveStreamRequestDto.builder()
                 .streamKey(streamKey)
                 .viewerUuid(viewerUuid)
                 .build();
