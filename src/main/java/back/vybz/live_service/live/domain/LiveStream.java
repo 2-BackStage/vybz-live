@@ -90,5 +90,9 @@ public class LiveStream {
         this.likeCount = likeCount;
     }
 
+    public void updateViewerCount(Integer viewerCount) {
+        this.viewerCount = viewerCount;
+    }
+
 
 }
