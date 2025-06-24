@@ -6,9 +6,10 @@ import back.vybz.live_service.common.util.CursorPage;
 import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.common.util.ViewerWebSocketHandler;
+import back.vybz.live_service.kafka.event.ViewCountKafkaEvent;
+import back.vybz.live_service.kafka.producer.ViewCountKafkaEventProducer;
 import back.vybz.live_service.live.domain.LiveStream;
 import back.vybz.live_service.live.domain.LiveStreamStatus;
-import back.vybz.live_service.live.dto.request.LiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
 import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
 import back.vybz.live_service.live.dto.response.LiveStreamResponseDto;
@@ -30,6 +31,7 @@ public class LiveStreamServiceImpl implements LiveStreamService {
     private final LiveRedisService liveRedisService;
     private final ViewerWebSocketHandler viewerWebSocketHandler;
     private final BuskerFeignClient buskerFeignClient;
+    private final ViewCountKafkaEventProducer viewCountKafkaEventProducer;
 
 
     @Transactional
@@ -85,15 +87,18 @@ public class LiveStreamServiceImpl implements LiveStreamService {
         LiveStream liveStream = liveRedisService.getLiveStreamFromRedis(streamKey)
                 .orElseThrow(() -> new BaseException(BaseResponseStatus.LIVE_STREAM_NOT_FOUND));
 
-//        String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
-
-//        kafka viewCount topic produce
+        viewCountKafkaEventProducer.send(
+                ViewCountKafkaEvent.builder()
+                        .streamKey(streamKey)
+                        .viewerUuid(viewerUuid)
+                        .build()
+        );
 
         return LiveStreamResponseDto.builder()
                 .title(liveStream.getTitle())
                 .buskerUuid(liveStream.getBuskerUuid())
                 .likeCount(liveStream.getLikeCount())
-                .viewerCount(liveStream.getViewerCount()+1)
+                .viewerCount(liveStream.getViewerCount() + 1)
                 .hlsUrl(streamKey)
                 .build();
 

@@ -27,19 +27,18 @@ public class LiveLikeCountResultEventConsumer {
 
         log.info("📥 Kafka 수신: streamKey={}, totalLikeCount={}", streamKey, likeCount);
 
-
-        viewerWebSocketHandler.pushLikeCount(streamKey, likeCount.longValue());
-        log.info("📡 WebSocket push 완료: streamKey={}, totalLikeCount={}", streamKey, likeCount);
-
-
         liveStreamRepository.findByStreamKey(streamKey)
                 .ifPresentOrElse(stream -> {
+
                     stream.updateLikeCount(likeCount);
                     liveStreamRepository.save(stream);
                     log.info("📝 live_stream.likeCount 업데이트 완료: streamKey={}, count={}", streamKey, likeCount);
+
+
+                    viewerWebSocketHandler.pushLikeCount(streamKey, likeCount.longValue());
+                    log.info("📡 WebSocket push 완료: streamKey={}, totalLikeCount={}", streamKey, likeCount);
                 }, () -> {
                     log.warn("❗ live_stream 문서를 찾을 수 없음: streamKey={}", streamKey);
                 });
     }
-
 }
