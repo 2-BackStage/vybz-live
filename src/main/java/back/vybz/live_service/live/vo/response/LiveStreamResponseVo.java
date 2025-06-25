@@ -12,22 +12,21 @@ public class LiveStreamResponseVo {
     private String buskerUuid;
     private int likeCount;
     private int viewerCount;
-    private String hlsUrl;
+    private String streamKey;
     private Long categoryId;
 
     @Builder
     public LiveStreamResponseVo(String title,
-                                      String buskerUuid,
-                                        int likeCount,
-                                      int viewerCount,
-                                      String hlsUrl,
-                                     Long categoryId) {
+                                String buskerUuid,
+                                int likeCount,
+                                int viewerCount,
+                                String streamKey,
+                                Long categoryId) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.likeCount = likeCount;
         this.viewerCount = viewerCount;
-        this.hlsUrl = hlsUrl;
+        this.streamKey = streamKey;
         this.categoryId = categoryId;
     }
-
 }

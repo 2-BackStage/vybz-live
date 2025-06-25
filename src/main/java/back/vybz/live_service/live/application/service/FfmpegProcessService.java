@@ -1,5 +1,8 @@
 package back.vybz.live_service.live.application.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
@@ -9,15 +12,17 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FfmpegProcessService {
 
     private Process ffmpegProcess;
     private OutputStream ffmpegInput;
 
-    private static final String RTMP_URL_PREFIX = "rtmp://localhost/live/";
+    @Value("${live.rtmp.url-prefix}")
+    private String rtmpUrlPrefix;
 
     public void startFfmpeg(WebSocketSession session, String streamKey) throws IOException {
-        String rtmpUrl = RTMP_URL_PREFIX + streamKey;
+        String rtmpUrl = rtmpUrlPrefix + streamKey;
 
         List<String> command = List.of(
                 "ffmpeg",
@@ -39,7 +44,6 @@ public class FfmpegProcessService {
         ffmpegInput = new BufferedOutputStream(ffmpegProcess.getOutputStream());
 
         log.info("✅ FFmpeg 프로세스 시작됨: streamKey={}, rtmpUrl={}", streamKey, rtmpUrl);
-
 
         new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(ffmpegProcess.getErrorStream()))) {

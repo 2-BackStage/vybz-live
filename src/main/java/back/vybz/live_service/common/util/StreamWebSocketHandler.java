@@ -15,23 +15,15 @@ import java.nio.ByteBuffer;
 public class StreamWebSocketHandler extends BinaryWebSocketHandler {
 
     private final FfmpegProcessService ffmpegProcessService;
-    private final StreamKeyValidator streamKeyValidator;
     private final ViewerWebSocketHandler viewerWebSocketHandler;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
             String streamKey = getStreamKeyFromQuery(session);
-            System.out.println("👀 [DEBUG] validator = " + streamKeyValidator);
-
-            if (!streamKeyValidator.isValidStreamKey(streamKey)) {
-                System.err.println("❌ 유효하지 않은 streamKey: " + streamKey);
-                session.close(CloseStatus.NOT_ACCEPTABLE);
-                return;
-            }
 
             ffmpegProcessService.startFfmpeg(session, streamKey);
-            System.out.println("✅ WebSocket 연결 성공 및 FFmpeg 프로세스 시작됨.");
+            System.out.println("✅ WebSocket 연결 성공 및 FFmpeg 프로세스 시작됨. streamKey = " + streamKey);
         } catch (Exception e) {
             System.err.println("❌ WebSocket 연결 중 에러: " + e.getMessage());
             e.printStackTrace();
@@ -39,6 +31,7 @@ public class StreamWebSocketHandler extends BinaryWebSocketHandler {
         }
     }
 
+    @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         System.out.println("📥 [SERVER] WebSocket Frame Received! Size: " + message.getPayloadLength());
 
@@ -60,9 +53,15 @@ public class StreamWebSocketHandler extends BinaryWebSocketHandler {
 
     private String getStreamKeyFromQuery(WebSocketSession webSocketSession) {
         String query = webSocketSession.getUri().getQuery();
+        if (query == null) {
+            return "defaultStreamKey";
+        }
+
         for (String param : query.split("&")) {
             String[] kv = param.split("=");
-            if (kv[0].equals("streamKey")) return kv[1];
+            if (kv.length == 2 && kv[0].equals("streamKey")) {
+                return kv[1];
+            }
         }
         return "defaultStreamKey";
     }

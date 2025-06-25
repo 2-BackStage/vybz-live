@@ -65,20 +65,6 @@ public class LiveStreamController {
     }
 
     @Operation(
-            summary = "라이브 스트림 퇴장 API",
-            description = "라이브 스트림에서 퇴장하는 API입니다.",
-            tags = {"LIVE-SERVICE"}
-    )
-    @PostMapping("/exit")
-    public BaseResponseEntity<Void> exitLiveStream(HttpServletRequest httpServletRequest,
-                                                   @RequestParam("streamKey") String streamKey) {
-        String viewerUuid = httpServletRequest.getHeader("X-User-Id");
-        liveStreamService.existLiveStream(streamKey, viewerUuid);
-        return new BaseResponseEntity<>();
-    }
-
-
-    @Operation(
             summary = "라이브 방송 목록 무한스크롤 조회 API",
             description = "라이브 방송 목록을 최신순으로 무한스크롤 방식으로 조회합니다. " +
                     "size는 한 페이지에 가져올 개수이며, 다음 목록 요청 시에는 lastId에 이전 목록의 마지막 id를 넣어주세요.",

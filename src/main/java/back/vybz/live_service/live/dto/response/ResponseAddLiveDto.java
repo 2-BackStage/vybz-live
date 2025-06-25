@@ -11,30 +11,27 @@ import lombok.NoArgsConstructor;
 public class ResponseAddLiveDto {
     private String id;
     private String streamKey;
-    private String hlsUrl;
     private LiveStreamStatus liveStreamStatus;
     private Long categoryId;
 
     @Builder
     public ResponseAddLiveDto(String id,
                               String streamKey,
-                              String hlsUrl,
                               LiveStreamStatus liveStreamStatus,
                               Long categoryId) {
         this.id = id;
         this.streamKey = streamKey;
-        this.hlsUrl = hlsUrl;
         this.liveStreamStatus = liveStreamStatus;
         this.categoryId = categoryId;
     }
+
     public ResponseAddLiveVo toVo() {
         return ResponseAddLiveVo.builder()
                 .id(id)
                 .streamKey(streamKey)
-                .hlsUrl(hlsUrl)
                 .liveStreamStatus(liveStreamStatus)
                 .categoryId(categoryId)
                 .build();
     }
-
 }
+

@@ -16,14 +16,17 @@ public class RequestAddLiveDto {
     private String title;
     private String buskerUuid;
     private String streamKey;
+    private Long categoryId;
 
     @Builder
     public RequestAddLiveDto(String title,
                              String buskerUuid,
-                             String streamKey) {
+                             String streamKey,
+                             Long categoryId) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.streamKey = streamKey;
+        this.categoryId = categoryId;
     }
 
     public static RequestAddLiveDto from(RequestAddLiveVo requestAddLiveVo, String buskerUuid, String streamKey) {
@@ -31,6 +34,7 @@ public class RequestAddLiveDto {
                 .title(requestAddLiveVo.getTitle())
                 .buskerUuid(buskerUuid)
                 .streamKey(streamKey)
+                .categoryId(requestAddLiveVo.getCategoryId())
                 .build();
     }
 

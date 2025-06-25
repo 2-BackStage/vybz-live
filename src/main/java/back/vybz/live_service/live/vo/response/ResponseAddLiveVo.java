@@ -10,20 +10,15 @@ import lombok.NoArgsConstructor;
 public class ResponseAddLiveVo {
     private String id;
     private String streamKey;
-    private String hlsUrl;
     private LiveStreamStatus liveStreamStatus;
     private Long categoryId;
 
     @Builder
-    public ResponseAddLiveVo(String id,
-                             String streamKey,
-                             String hlsUrl,
-                             LiveStreamStatus liveStreamStatus,
-                             Long categoryId) {
+    public ResponseAddLiveVo(String id, String streamKey, LiveStreamStatus liveStreamStatus, Long categoryId) {
         this.id = id;
         this.streamKey = streamKey;
-        this.hlsUrl = hlsUrl;
         this.liveStreamStatus = liveStreamStatus;
         this.categoryId = categoryId;
     }
 }
+
