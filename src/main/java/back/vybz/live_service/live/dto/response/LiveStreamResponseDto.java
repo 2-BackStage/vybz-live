@@ -13,8 +13,7 @@ public class LiveStreamResponseDto {
     private String buskerUuid;
     private int likeCount;
     private int viewerCount;
-    private boolean isAlreadyWatching;
-    private String hlsUrl;
+    private String streamKey;
     private Long categoryId;
 
     @Builder
@@ -22,15 +21,13 @@ public class LiveStreamResponseDto {
                                  String buskerUuid,
                                  int likeCount,
                                  int viewerCount,
-                                 boolean isAlreadyWatching,
-                                 String hlsUrl,
+                                 String streamKey,
                                  Long categoryId) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.likeCount = likeCount;
         this.viewerCount = viewerCount;
-        this.isAlreadyWatching = isAlreadyWatching;
-        this.hlsUrl = hlsUrl;
+        this.streamKey = streamKey;
         this.categoryId = categoryId;
     }
 
@@ -40,9 +37,8 @@ public class LiveStreamResponseDto {
                 .buskerUuid(buskerUuid)
                 .viewerCount(viewerCount)
                 .likeCount(likeCount)
-                .hlsUrl(hlsUrl)
+                .streamKey(streamKey)
                 .categoryId(categoryId)
                 .build();
     }
-
 }

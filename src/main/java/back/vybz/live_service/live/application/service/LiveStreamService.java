@@ -12,8 +12,6 @@ public interface LiveStreamService {
     ResponseAddLiveDto createLiveStream(RequestAddLiveDto requestAddLiveDto, String buskerUuid);
     void endLiveStream(String buskerUuid, String streamKey);
     LiveStreamResponseDto getLiveStream(String streamKey, String viewerUuid);
-
-    void existLiveStream(String streamKey, String viewerUuid);
     ScrollLiveResponseDto getLiveStreamScrollList(ScrollLiveRequestDto scrollLiveRequestDto);
     ScrollLiveResponseDto getLiveStreamScrollListByCategory(ScrollLiveRequestDto scrollLiveRequestDto);
 

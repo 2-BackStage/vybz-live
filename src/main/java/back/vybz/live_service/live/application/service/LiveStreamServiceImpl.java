@@ -3,7 +3,6 @@ package back.vybz.live_service.live.application.service;
 import back.vybz.live_service.common.exception.BaseException;
 import back.vybz.live_service.common.exception.BaseResponseStatus;
 import back.vybz.live_service.common.util.CursorPage;
-import back.vybz.live_service.common.util.LiveRedisService;
 import back.vybz.live_service.common.util.StreamKeyGenerator;
 import back.vybz.live_service.common.util.ViewerWebSocketHandler;
 import back.vybz.live_service.kafka.event.ViewCountKafkaEvent;
@@ -28,45 +27,34 @@ import java.util.List;
 public class LiveStreamServiceImpl implements LiveStreamService {
 
     private final LiveStreamRepository liveStreamRepository;
-    private final LiveRedisService liveRedisService;
     private final ViewerWebSocketHandler viewerWebSocketHandler;
-    private final BuskerFeignClient buskerFeignClient;
     private final ViewCountKafkaEventProducer viewCountKafkaEventProducer;
-
 
     @Transactional
     @Override
     public ResponseAddLiveDto createLiveStream(RequestAddLiveDto requestAddLiveDto, String buskerUuid) {
         String streamKey = StreamKeyGenerator.generate();
 
-        Long categoryId = buskerFeignClient.getMainCategoryByBusker(buskerUuid).result().getCategoryId();
-
         LiveStream liveStream = LiveStream.builder()
                 .buskerUuid(buskerUuid)
                 .title(requestAddLiveDto.getTitle())
                 .streamKey(streamKey)
                 .liveStreamStatus(LiveStreamStatus.ON_AIR)
-                .categoryId(categoryId)
+                .categoryId(requestAddLiveDto.getCategoryId())
                 .startTime(Instant.now())
                 .likeCount(0)
                 .viewerCount(0)
                 .build();
 
-
         LiveStream saved = liveStreamRepository.save(liveStream);
-        liveRedisService.saveLiveStreamToRedis(saved);
-
-        String hlsUrl = "http://localhost:8090/hls/" + streamKey + ".m3u8";
 
         return ResponseAddLiveDto.builder()
                 .id(saved.getId())
                 .streamKey(saved.getStreamKey())
-                .hlsUrl(hlsUrl)
                 .liveStreamStatus(saved.getLiveStreamStatus())
                 .categoryId(saved.getCategoryId())
                 .build();
     }
-
 
     @Override
     @Transactional
@@ -77,14 +65,13 @@ public class LiveStreamServiceImpl implements LiveStreamService {
         liveStream.endLiveStream();
         liveStreamRepository.save(liveStream);
 
-        liveRedisService.removeLiveStreamFromRedis(buskerUuid);
         viewerWebSocketHandler.notifyStreamEnded(streamKey);
     }
 
     @Override
     public LiveStreamResponseDto getLiveStream(String streamKey, String viewerUuid) {
 
-        LiveStream liveStream = liveRedisService.getLiveStreamFromRedis(streamKey)
+        LiveStream liveStream = liveStreamRepository.findByStreamKey(streamKey)
                 .orElseThrow(() -> new BaseException(BaseResponseStatus.LIVE_STREAM_NOT_FOUND));
 
         viewCountKafkaEventProducer.send(
@@ -99,15 +86,9 @@ public class LiveStreamServiceImpl implements LiveStreamService {
                 .buskerUuid(liveStream.getBuskerUuid())
                 .likeCount(liveStream.getLikeCount())
                 .viewerCount(liveStream.getViewerCount() + 1)
-                .hlsUrl(streamKey)
+                .streamKey(liveStream.getStreamKey())
+                .categoryId(liveStream.getCategoryId())
                 .build();
-
-    }
-
-    @Override
-    @Transactional
-    public void existLiveStream(String streamKey, String viewerUuid) {
-        liveRedisService.exitViewer(streamKey, viewerUuid);
     }
 
     @Override
@@ -152,6 +133,3 @@ public class LiveStreamServiceImpl implements LiveStreamService {
         return ScrollLiveResponseDto.from(cursorPage);
     }
 }
-
-
-
