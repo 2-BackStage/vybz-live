@@ -2,13 +2,11 @@ package back.vybz.live_service.live.presentation;
 
 import back.vybz.live_service.common.entity.BaseResponseEntity;
 import back.vybz.live_service.live.application.service.LiveStreamService;
-import back.vybz.live_service.live.dto.request.LiveStreamRequestDto;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
 import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
 import back.vybz.live_service.live.dto.response.LiveStreamResponseDto;
 import back.vybz.live_service.live.dto.response.ResponseAddLiveDto;
 import back.vybz.live_service.live.dto.response.ScrollLiveResponseDto;
-import back.vybz.live_service.live.vo.request.LiveStreamRequestVo;
 import back.vybz.live_service.live.vo.request.RequestAddLiveVo;
 import back.vybz.live_service.live.vo.response.LiveStreamResponseVo;
 import back.vybz.live_service.live.vo.response.ResponseAddLiveVo;
@@ -33,10 +31,9 @@ public class LiveStreamController {
     )
     @PostMapping("/start")
     public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(HttpServletRequest httpServletRequest,
-                                                                  @RequestBody RequestAddLiveVo requestAddLiveVo) {
-        String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
-
-        log.info("🔍 Received X-Busker-Id: {}", buskerUuid);
+                                                                  @RequestBody RequestAddLiveVo requestAddLiveVo,
+    @RequestHeader(value="X-Busker-Id") String buskerUuid
+    ) {
 
         RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
         ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
