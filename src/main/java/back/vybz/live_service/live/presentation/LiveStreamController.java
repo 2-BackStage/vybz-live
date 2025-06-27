@@ -1,6 +1,8 @@
 package back.vybz.live_service.live.presentation;
 
 import back.vybz.live_service.common.entity.BaseResponseEntity;
+import back.vybz.live_service.common.exception.BaseException;
+import back.vybz.live_service.common.exception.BaseResponseStatus;
 import back.vybz.live_service.live.application.service.LiveStreamService;
 import back.vybz.live_service.live.dto.request.RequestAddLiveDto;
 import back.vybz.live_service.live.dto.request.ScrollLiveRequestDto;
@@ -23,18 +25,17 @@ public class LiveStreamController {
 
     private final LiveStreamService liveStreamService;
 
-    @Operation(
-            summary = "라이브 스트림 시작 API",
-            description = "라이브 스트림을 시작하는 API입니다.",
-            tags = {"LIVE-SERVICE"}
-    )
+    @Operation(summary = "라이브 스트림 시작 API", description = "버스커만 사용 가능", tags = {"LIVE-SERVICE"})
     @PostMapping("/start")
     public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(
-            @RequestHeader("X-Busker-Id") String buskerUuid,
+            @RequestHeader(value = "X-Busker-Id", required = false) String buskerUuid,
             @RequestBody RequestAddLiveVo requestAddLiveVo) {
 
-        log.info("🎬 [start] 컨트롤러 진입");
-        log.info("📌 X-Busker-Id: {}", buskerUuid);
+        if (buskerUuid == null || buskerUuid.isBlank()) {
+            throw new BaseException(BaseResponseStatus.UNAUTHORIZED);
+        }
+
+        log.info("🎬 [start] 컨트롤러 진입 - buskerUuid: {}", buskerUuid);
         log.info("📦 RequestAddLiveVo: {}", requestAddLiveVo);
 
         RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
@@ -42,55 +43,47 @@ public class LiveStreamController {
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());
     }
 
-    @Operation(
-            summary = "라이브 스트림 종료 API",
-            description = "라이브 스트림을 종료하는 API입니다.",
-            tags = {"LIVE-SERVICE"}
-    )
+    @Operation(summary = "라이브 스트림 종료 API", description = "버스커만 사용 가능", tags = {"LIVE-SERVICE"})
     @PostMapping("/end")
     public BaseResponseEntity<Void> endLiveStream(
-            @RequestHeader("X-Busker-Id") String buskerUuid,
+            @RequestHeader(value = "X-Busker-Id", required = false) String buskerUuid,
             @RequestParam("streamKey") String streamKey) {
 
-        log.info("🛑 [end] 컨트롤러 진입");
-        log.info("📌 X-Busker-Id: {}", buskerUuid);
-        log.info("📌 streamKey: {}", streamKey);
+        if (buskerUuid == null || buskerUuid.isBlank()) {
+            throw new BaseException(BaseResponseStatus.UNAUTHORIZED);
+        }
+
+        log.info("🛑 [end] 컨트롤러 진입 - buskerUuid: {}, streamKey: {}", buskerUuid, streamKey);
 
         liveStreamService.endLiveStream(buskerUuid, streamKey);
         return new BaseResponseEntity<>();
     }
 
-    @Operation(
-            summary = "라이브 스트림 입장 API",
-            description = "라이브 스트림에 입장하는 API입니다.",
-            tags = {"LIVE-SERVICE"}
-    )
+    @Operation(summary = "라이브 스트림 입장 API", description = "유저/버스커 모두 입장 가능", tags = {"LIVE-SERVICE"})
     @GetMapping("/enter/{streamKey}")
     public BaseResponseEntity<LiveStreamResponseVo> enterLiveStream(
-            @RequestHeader("X-User-Id") String viewerUuid,
+            @RequestHeader(value = "X-User-Id", required = false) String viewerUuid,
+            @RequestHeader(value = "X-Busker-Id", required = false) String buskerUuid,
             @PathVariable("streamKey") String streamKey) {
 
-        log.info("🚪 [enter] 컨트롤러 진입");
-        log.info("📌 streamKey: {}", streamKey);
-        log.info("📌 X-User-Id: {}", viewerUuid);
+        String uuid = viewerUuid != null ? viewerUuid : buskerUuid;
+        if (uuid == null || uuid.isBlank()) {
+            throw new BaseException(BaseResponseStatus.UNAUTHORIZED);
+        }
 
-        LiveStreamResponseDto liveStreamResponseDto = liveStreamService.getLiveStream(streamKey, viewerUuid);
+        log.info("🚪 [enter] 컨트롤러 진입 - streamKey: {}, uuid: {}", streamKey, uuid);
+
+        LiveStreamResponseDto liveStreamResponseDto = liveStreamService.getLiveStream(streamKey, uuid);
         return new BaseResponseEntity<>(liveStreamResponseDto.toVo());
     }
 
-    @Operation(
-            summary = "라이브 방송 목록 무한스크롤 조회 API",
-            description = "라이브 방송 목록을 최신순으로 무한스크롤 방식으로 조회합니다.",
-            tags = {"LIVE-SERVICE"}
-    )
+    @Operation(summary = "라이브 방송 목록 무한스크롤 조회 API", tags = {"LIVE-SERVICE"})
     @GetMapping("/all")
     public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamList(
             @RequestParam(required = false) String lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        log.info("📃 [all] 컨트롤러 진입");
-        log.info("📌 lastId: {}", lastId);
-        log.info("📌 size: {}", size);
+        log.info("📃 [all] 컨트롤러 진입 - lastId: {}, size: {}", lastId, size);
 
         ScrollLiveRequestDto scrollLiveRequestDto = ScrollLiveRequestDto.builder()
                 .lastId(lastId)
@@ -100,21 +93,14 @@ public class LiveStreamController {
         return BaseResponseEntity.ok(liveStreamService.getLiveStreamScrollList(scrollLiveRequestDto));
     }
 
-    @Operation(
-            summary = "카테고리별 라이브 방송 목록 무한스크롤 조회 API",
-            description = "특정 카테고리의 라이브 방송 목록을 무한스크롤 방식으로 조회합니다.",
-            tags = {"LIVE-SERVICE"}
-    )
+    @Operation(summary = "카테고리별 라이브 방송 목록 무한스크롤 조회 API", tags = {"LIVE-SERVICE"})
     @GetMapping("/category")
     public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamListByCategory(
             @RequestParam Long categoryId,
             @RequestParam(required = false) String lastId,
             @RequestParam(defaultValue = "10") int size) {
 
-        log.info("📂 [category] 컨트롤러 진입");
-        log.info("📌 categoryId: {}", categoryId);
-        log.info("📌 lastId: {}", lastId);
-        log.info("📌 size: {}", size);
+        log.info("📂 [category] 컨트롤러 진입 - categoryId: {}, lastId: {}, size: {}", categoryId, lastId, size);
 
         ScrollLiveRequestDto scrollLiveRequestDto = ScrollLiveRequestDto.builder()
                 .categoryId(categoryId)

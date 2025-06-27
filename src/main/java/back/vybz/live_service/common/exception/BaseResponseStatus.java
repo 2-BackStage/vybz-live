@@ -31,11 +31,11 @@ public enum BaseResponseStatus {
     /**
      * 400 : security 에러
      */
-
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, false, 400, "인증 정보가 누락되었습니다."),
     WRONG_TOKEN(HttpStatus.UNAUTHORIZED, false, 401, "토큰이 유효하지 않습니다"),
     NO_SIGN_IN(HttpStatus.UNAUTHORIZED, false, 402, "로그인을 먼저 진행해주세요"),
     NO_ACCESS_AUTHORITY(HttpStatus.FORBIDDEN, false, 403, "접근 권한이 없습니다"),
-    NO_AUTHORIZATION_TO_UPDATE_NOTICE(HttpStatus.FORBIDDEN,false,403, "이 공지를 수정할 권한이 없습니다."),
+    NO_AUTHORIZATION_TO_UPDATE_NOTICE(HttpStatus.FORBIDDEN, false, 403, "이 공지를 수정할 권한이 없습니다."),
     NO_AUTHORIZATION_TO_DELETE_NOTICE(HttpStatus.FORBIDDEN, false, 403, "이 공지를 삭제할 권한이 없습니다."),
     DISABLED_USER(HttpStatus.FORBIDDEN, false, 404, "비활성화된 계정입니다. 계정을 복구하시겠습니까?"),
     FAILED_TO_RESTORE(HttpStatus.INTERNAL_SERVER_ERROR, false, 405, "계정 복구에 실패했습니다. 관리자에게 문의해주세요."),
@@ -44,8 +44,8 @@ public enum BaseResponseStatus {
     REFRESH_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, false, 408, "Refresh Token이 존재하지 않습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, false, 409, "Refresh Token이 만료되었습니다. 다시 로그인해주세요."),
     INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, false, 410, "유효하지 않은 Access Token입니다."),
-    NO_EXIST_NOTICE(HttpStatus.NOT_FOUND,false,404, "존재하지 않는 공지사항입니다."),
-    NO_EXIST_COMMENT_OR_NO_AUTH(HttpStatus.NOT_FOUND, false,404,"댓글이 존재하지 않거나 권한이 없습니다."),
+    NO_EXIST_NOTICE(HttpStatus.NOT_FOUND, false, 404, "존재하지 않는 공지사항입니다."),
+    NO_EXIST_COMMENT_OR_NO_AUTH(HttpStatus.NOT_FOUND, false, 404, "댓글이 존재하지 않거나 권한이 없습니다."),
     REELS_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, false, 411, "릴스 저장에 실패했습니다."),
     NO_AUTHORIZATION_TO_UPDATE_REELS(HttpStatus.FORBIDDEN, false, 412, "이 릴스를 수정할 권한이 없습니다."),
     NO_AUTHORIZATION_TO_DELETE_REELS(HttpStatus.FORBIDDEN, false, 413, "이 릴스를 삭제할 권한이 없습니다."),
@@ -71,9 +71,6 @@ public enum BaseResponseStatus {
     NO_AUTHORIZATION_TO_UPDATE_ABOUT(HttpStatus.FORBIDDEN, false, 506, "이 자기소개를 수정할 권한이 없습니다."),
     NO_AUTHORIZATION_TO_DELETE_ABOUT(HttpStatus.FORBIDDEN, false, 507, "이 자기소개를 삭제할 권한이 없습니다."),
     ALREADY_EXISTS_ABOUT(HttpStatus.CONFLICT, false, 508, "이미 등록된 자기소개가 존재합니다."),
-
-
-
 
 
     /**
@@ -129,7 +126,7 @@ public enum BaseResponseStatus {
     // mail
     INVALID_EMAIL_CODE(HttpStatus.BAD_REQUEST, false, 2117, "인증코드가 틀렸습니다."),
     EXPIRED_EMAIL_CODE(HttpStatus.BAD_REQUEST, false, 2118, "틀리거나 만료된 인증코드입니다."),
-    EMAIL_CODE_SEND_LIMITED(HttpStatus.TOO_MANY_REQUESTS, false, 2119,"이메일 발송은 3분에 1회 입니다. 잠시 후 다시 시도해주세요."),
+    EMAIL_CODE_SEND_LIMITED(HttpStatus.TOO_MANY_REQUESTS, false, 2119, "이메일 발송은 3분에 1회 입니다. 잠시 후 다시 시도해주세요."),
     EMAIL_CODE_VERIFICATION_LIMITED(HttpStatus.TOO_MANY_REQUESTS, false, 2120, "인증에 반복적으로 실패했습니다. 다시 코드 전송을 요청해주세요."),
     NOT_FOUND_EMAIL(HttpStatus.NOT_FOUND, false, 2121, "가입되지 않은 이메일입니다."),
 
