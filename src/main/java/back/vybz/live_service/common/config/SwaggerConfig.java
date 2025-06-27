@@ -1,4 +1,5 @@
 package back.vybz.live_service.common.config;
+
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -11,32 +12,26 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SwaggerConfig {
 
-    private static final String BEARER_TOKEN_PREFIX = "Bearer";
+    private static final String SECURITY_SCHEME_NAME = "Bearer Authentication";
 
     @Bean
     public OpenAPI openAPI() {
-
-        String securityJwtName = "JWT";
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList(securityJwtName);
-        Components components = new Components()
-                .addSecuritySchemes(securityJwtName, new SecurityScheme()
-                        .name(securityJwtName)
-                        .type(SecurityScheme.Type.HTTP)
-                        .scheme(BEARER_TOKEN_PREFIX)
-                        .bearerFormat(securityJwtName));
-
         return new OpenAPI()
-                .addSecurityItem(securityRequirement)
-                .components(components)
-                .addServersItem(new Server().url("/live-service"))
-                .info(apiInfo());
+                .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))
+                .components(new Components()
+                        .addSecuritySchemes(SECURITY_SCHEME_NAME,
+                                new SecurityScheme()
+                                        .name(SECURITY_SCHEME_NAME)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                        )
+                )
+                .addServersItem(new Server().url("/live-service"))  // 게이트웨이 경로
+                .info(new Info()
+                        .title("VYBZ LIVE SERVICE 문서")
+                        .description("LIVE SERVICE API 테스트를 위한 Swagger UI")
+                        .version("1.0.0")
+                );
     }
-
-    private Info apiInfo() {
-        return new Info()
-                .title("VYBZ LIVE SERVICE 문서")
-                .description("LIVE SERVICE API 테스트를 위한 Swagger UI")
-                .version("1.0.0");
-    }
-
 }
