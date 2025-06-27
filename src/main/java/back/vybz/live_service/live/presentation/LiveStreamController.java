@@ -31,13 +31,13 @@ public class LiveStreamController {
     )
     @PostMapping("/start")
     public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(HttpServletRequest httpServletRequest,
-                                                                  @RequestBody RequestAddLiveVo requestAddLiveVo,
-    @RequestHeader(value="X-Busker-Id") String buskerUuid
-    ) {
+                                                                  @RequestBody RequestAddLiveVo requestAddLiveVo) {
+        String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
 
-        log.info("🎬 [startLive] 컨트롤러 진입 성공");
-        log.info("📌 buskerUuid (X-Busker-Id): {}", buskerUuid);
-        log.info("📌 요청 바디(requestAddLiveVo): {}", requestAddLiveVo);
+        log.info("🎬 [start] 컨트롤러 진입");
+        log.info("📌 X-Busker-Id: {}", buskerUuid);
+        log.info("📦 RequestAddLiveVo: {}", requestAddLiveVo);
+
         RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
         ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());
@@ -52,6 +52,11 @@ public class LiveStreamController {
     public BaseResponseEntity<Void> endLiveStream(HttpServletRequest httpServletRequest,
                                                   @RequestParam("streamKey") String streamKey) {
         String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
+
+        log.info("🛑 [end] 컨트롤러 진입");
+        log.info("📌 X-Busker-Id: {}", buskerUuid);
+        log.info("📌 streamKey: {}", streamKey);
+
         liveStreamService.endLiveStream(buskerUuid, streamKey);
         return new BaseResponseEntity<>();
     }
@@ -65,19 +70,27 @@ public class LiveStreamController {
     public BaseResponseEntity<LiveStreamResponseVo> enterLiveStream(HttpServletRequest httpServletRequest,
                                                                     @PathVariable("streamKey") String streamKey) {
         String viewerUuid = httpServletRequest.getHeader("X-User-Id");
+
+        log.info("🚪 [enter] 컨트롤러 진입");
+        log.info("📌 streamKey: {}", streamKey);
+        log.info("📌 X-User-Id: {}", viewerUuid);
+
         LiveStreamResponseDto liveStreamResponseDto = liveStreamService.getLiveStream(streamKey, viewerUuid);
         return new BaseResponseEntity<>(liveStreamResponseDto.toVo());
     }
 
     @Operation(
             summary = "라이브 방송 목록 무한스크롤 조회 API",
-            description = "라이브 방송 목록을 최신순으로 무한스크롤 방식으로 조회합니다. " +
-                    "size는 한 페이지에 가져올 개수이며, 다음 목록 요청 시에는 lastId에 이전 목록의 마지막 id를 넣어주세요.",
+            description = "라이브 방송 목록을 최신순으로 무한스크롤 방식으로 조회합니다.",
             tags = {"LIVE-SERVICE"}
     )
     @GetMapping("/all")
-    public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamList(@RequestParam (required = false) String lastId,
-                                                                             @RequestParam (defaultValue = "10") int size) {
+    public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamList(@RequestParam(required = false) String lastId,
+                                                                             @RequestParam(defaultValue = "10") int size) {
+        log.info("📃 [all] 컨트롤러 진입");
+        log.info("📌 lastId: {}", lastId);
+        log.info("📌 size: {}", size);
+
         ScrollLiveRequestDto scrollLiveRequestDto = ScrollLiveRequestDto.builder()
                 .lastId(lastId)
                 .size(size)
@@ -86,17 +99,20 @@ public class LiveStreamController {
         return BaseResponseEntity.ok(liveStreamService.getLiveStreamScrollList(scrollLiveRequestDto));
     }
 
-
     @Operation(
             summary = "카테고리별 라이브 방송 목록 무한스크롤 조회 API",
-            description = "특정 카테고리의 라이브 방송 목록을 무한스크롤 방식으로 조회합니다. " +
-                    "size는 한 페이지에 가져올 개수이며, 다음 목록 요청 시에는 lastId에 이전 목록의 마지막 id를 넣어주세요.",
+            description = "특정 카테고리의 라이브 방송 목록을 무한스크롤 방식으로 조회합니다.",
             tags = {"LIVE-SERVICE"}
     )
     @GetMapping("/category")
     public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamListByCategory(@RequestParam Long categoryId,
                                                                                        @RequestParam(required = false) String lastId,
                                                                                        @RequestParam(defaultValue = "10") int size) {
+        log.info("📂 [category] 컨트롤러 진입");
+        log.info("📌 categoryId: {}", categoryId);
+        log.info("📌 lastId: {}", lastId);
+        log.info("📌 size: {}", size);
+
         ScrollLiveRequestDto scrollLiveRequestDto = ScrollLiveRequestDto.builder()
                 .categoryId(categoryId)
                 .lastId(lastId)
@@ -105,5 +121,4 @@ public class LiveStreamController {
 
         return BaseResponseEntity.ok(liveStreamService.getLiveStreamScrollListByCategory(scrollLiveRequestDto));
     }
-
 }
