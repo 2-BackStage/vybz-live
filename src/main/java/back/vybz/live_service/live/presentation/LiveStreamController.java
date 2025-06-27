@@ -35,6 +35,9 @@ public class LiveStreamController {
     @RequestHeader(value="X-Busker-Id") String buskerUuid
     ) {
 
+        log.info("🎬 [startLive] 컨트롤러 진입 성공");
+        log.info("📌 buskerUuid (X-Busker-Id): {}", buskerUuid);
+        log.info("📌 요청 바디(requestAddLiveVo): {}", requestAddLiveVo);
         RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
         ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());
