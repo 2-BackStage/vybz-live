@@ -15,8 +15,10 @@ import back.vybz.live_service.live.vo.response.ResponseAddLiveVo;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/live")
 @RequiredArgsConstructor
@@ -33,6 +35,9 @@ public class LiveStreamController {
     public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(HttpServletRequest httpServletRequest,
                                                                   @RequestBody RequestAddLiveVo requestAddLiveVo) {
         String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
+
+        log.info("🔍 Received X-Busker-Id: {}", buskerUuid);
+
         RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
         ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());

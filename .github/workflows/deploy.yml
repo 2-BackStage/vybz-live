@@ -27,7 +27,6 @@ jobs:
           # resources 디렉토리가 없을 경우 생성
           mkdir -p src/main/resources 
           
-          # GitHub Secrets에 등록한 application.yml 내용을 복사
           echo "${{ secrets.LIVE_APPLICATION_YML }}" | base64 -d > src/main/resources/application.yml
           
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/live-service:${{ github.sha }} .
