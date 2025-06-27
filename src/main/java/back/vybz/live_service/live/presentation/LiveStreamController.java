@@ -11,7 +11,6 @@ import back.vybz.live_service.live.vo.request.RequestAddLiveVo;
 import back.vybz.live_service.live.vo.response.LiveStreamResponseVo;
 import back.vybz.live_service.live.vo.response.ResponseAddLiveVo;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +29,9 @@ public class LiveStreamController {
             tags = {"LIVE-SERVICE"}
     )
     @PostMapping("/start")
-    public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(HttpServletRequest httpServletRequest,
-                                                                  @RequestBody RequestAddLiveVo requestAddLiveVo) {
-        String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
+    public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(
+            @RequestHeader("X-Busker-Id") String buskerUuid,
+            @RequestBody RequestAddLiveVo requestAddLiveVo) {
 
         log.info("🎬 [start] 컨트롤러 진입");
         log.info("📌 X-Busker-Id: {}", buskerUuid);
@@ -49,9 +48,9 @@ public class LiveStreamController {
             tags = {"LIVE-SERVICE"}
     )
     @PostMapping("/end")
-    public BaseResponseEntity<Void> endLiveStream(HttpServletRequest httpServletRequest,
-                                                  @RequestParam("streamKey") String streamKey) {
-        String buskerUuid = httpServletRequest.getHeader("X-Busker-Id");
+    public BaseResponseEntity<Void> endLiveStream(
+            @RequestHeader("X-Busker-Id") String buskerUuid,
+            @RequestParam("streamKey") String streamKey) {
 
         log.info("🛑 [end] 컨트롤러 진입");
         log.info("📌 X-Busker-Id: {}", buskerUuid);
@@ -67,9 +66,9 @@ public class LiveStreamController {
             tags = {"LIVE-SERVICE"}
     )
     @GetMapping("/enter/{streamKey}")
-    public BaseResponseEntity<LiveStreamResponseVo> enterLiveStream(HttpServletRequest httpServletRequest,
-                                                                    @PathVariable("streamKey") String streamKey) {
-        String viewerUuid = httpServletRequest.getHeader("X-User-Id");
+    public BaseResponseEntity<LiveStreamResponseVo> enterLiveStream(
+            @RequestHeader("X-User-Id") String viewerUuid,
+            @PathVariable("streamKey") String streamKey) {
 
         log.info("🚪 [enter] 컨트롤러 진입");
         log.info("📌 streamKey: {}", streamKey);
@@ -85,8 +84,10 @@ public class LiveStreamController {
             tags = {"LIVE-SERVICE"}
     )
     @GetMapping("/all")
-    public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamList(@RequestParam(required = false) String lastId,
-                                                                             @RequestParam(defaultValue = "10") int size) {
+    public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamList(
+            @RequestParam(required = false) String lastId,
+            @RequestParam(defaultValue = "10") int size) {
+
         log.info("📃 [all] 컨트롤러 진입");
         log.info("📌 lastId: {}", lastId);
         log.info("📌 size: {}", size);
@@ -105,9 +106,11 @@ public class LiveStreamController {
             tags = {"LIVE-SERVICE"}
     )
     @GetMapping("/category")
-    public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamListByCategory(@RequestParam Long categoryId,
-                                                                                       @RequestParam(required = false) String lastId,
-                                                                                       @RequestParam(defaultValue = "10") int size) {
+    public BaseResponseEntity<ScrollLiveResponseDto> getScrollLiveStreamListByCategory(
+            @RequestParam Long categoryId,
+            @RequestParam(required = false) String lastId,
+            @RequestParam(defaultValue = "10") int size) {
+
         log.info("📂 [category] 컨트롤러 진입");
         log.info("📌 categoryId: {}", categoryId);
         log.info("📌 lastId: {}", lastId);
