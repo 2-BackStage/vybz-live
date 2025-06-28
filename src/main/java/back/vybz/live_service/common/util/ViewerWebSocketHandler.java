@@ -119,7 +119,7 @@ public class ViewerWebSocketHandler extends TextWebSocketHandler {
             }
             
             // 구독자 전용 라이브가 아닌 경우 접근 허용
-            if (!liveStream.isMembershipOnly()) {
+            if (!liveStream.isMembership()) {
                 return true;
             }
             
