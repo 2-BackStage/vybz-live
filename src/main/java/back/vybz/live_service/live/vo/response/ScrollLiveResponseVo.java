@@ -20,6 +20,7 @@ public class ScrollLiveResponseVo {
     private int viewerCount;
     private LiveStreamStatus liveStreamStatus;
     private Instant startedAt;
+    private boolean membership;
 
     @Builder
     public ScrollLiveResponseVo(String streamKey,
@@ -28,7 +29,8 @@ public class ScrollLiveResponseVo {
                                 String thumbnailUrl,
                                 int viewerCount,
                                 LiveStreamStatus liveStreamStatus,
-                                Instant startedAt) {
+                                Instant startedAt,
+                                boolean membership) {
         this.streamKey = streamKey;
         this.title = title;
         this.buskerUuid = buskerUuid;
@@ -36,6 +38,7 @@ public class ScrollLiveResponseVo {
         this.viewerCount = viewerCount;
         this.liveStreamStatus = liveStreamStatus;
         this.startedAt = startedAt;
+        this.membership = membership;
     }
 
     public static ScrollLiveResponseVo from(LiveStream liveStream) {
@@ -47,6 +50,7 @@ public class ScrollLiveResponseVo {
                 .viewerCount(liveStream.getViewerCount())
                 .liveStreamStatus(liveStream.getLiveStreamStatus())
                 .startedAt(liveStream.getStartTime())
+                .membership(liveStream.isMembership())
                 .build();
     }
     public static List<ScrollLiveResponseVo> listFrom(List<LiveStream> liveStreams) {

@@ -15,6 +15,7 @@ public class LiveStreamResponseDto {
     private int viewerCount;
     private String streamKey;
     private Long categoryId;
+    private boolean membership;
 
     @Builder
     public LiveStreamResponseDto(String title,
@@ -22,13 +23,15 @@ public class LiveStreamResponseDto {
                                  int likeCount,
                                  int viewerCount,
                                  String streamKey,
-                                 Long categoryId) {
+                                 Long categoryId,
+                                 boolean membership) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.likeCount = likeCount;
         this.viewerCount = viewerCount;
         this.streamKey = streamKey;
         this.categoryId = categoryId;
+        this.membership = membership;
     }
 
     public LiveStreamResponseVo toVo() {
@@ -39,6 +42,7 @@ public class LiveStreamResponseDto {
                 .likeCount(likeCount)
                 .streamKey(streamKey)
                 .categoryId(categoryId)
+                .membership(membership)
                 .build();
     }
 }

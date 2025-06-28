@@ -12,13 +12,15 @@ public class ResponseAddLiveVo {
     private String streamKey;
     private LiveStreamStatus liveStreamStatus;
     private Long categoryId;
+    private boolean membership;
 
     @Builder
-    public ResponseAddLiveVo(String id, String streamKey, LiveStreamStatus liveStreamStatus, Long categoryId) {
+    public ResponseAddLiveVo(String id, String streamKey, LiveStreamStatus liveStreamStatus, Long categoryId, boolean membership) {
         this.id = id;
         this.streamKey = streamKey;
         this.liveStreamStatus = liveStreamStatus;
         this.categoryId = categoryId;
+        this.membership = membership;
     }
 }
 

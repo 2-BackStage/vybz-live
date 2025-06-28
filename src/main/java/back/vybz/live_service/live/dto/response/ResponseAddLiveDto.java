@@ -13,16 +13,19 @@ public class ResponseAddLiveDto {
     private String streamKey;
     private LiveStreamStatus liveStreamStatus;
     private Long categoryId;
+    private boolean membership;
 
     @Builder
     public ResponseAddLiveDto(String id,
                               String streamKey,
                               LiveStreamStatus liveStreamStatus,
-                              Long categoryId) {
+                              Long categoryId,
+                              boolean membership) {
         this.id = id;
         this.streamKey = streamKey;
         this.liveStreamStatus = liveStreamStatus;
         this.categoryId = categoryId;
+        this.membership = membership;
     }
 
     public ResponseAddLiveVo toVo() {
@@ -31,6 +34,7 @@ public class ResponseAddLiveDto {
                 .streamKey(streamKey)
                 .liveStreamStatus(liveStreamStatus)
                 .categoryId(categoryId)
+                .membership(membership)
                 .build();
     }
 }

@@ -14,6 +14,7 @@ public class LiveStreamResponseVo {
     private int viewerCount;
     private String streamKey;
     private Long categoryId;
+    private boolean membership;
 
     @Builder
     public LiveStreamResponseVo(String title,
@@ -21,12 +22,14 @@ public class LiveStreamResponseVo {
                                 int likeCount,
                                 int viewerCount,
                                 String streamKey,
-                                Long categoryId) {
+                                Long categoryId,
+                                boolean membership) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.likeCount = likeCount;
         this.viewerCount = viewerCount;
         this.streamKey = streamKey;
         this.categoryId = categoryId;
+        this.membership = membership;
     }
 }

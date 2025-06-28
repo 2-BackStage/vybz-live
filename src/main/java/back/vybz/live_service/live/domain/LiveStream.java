@@ -42,6 +42,9 @@ public class LiveStream {
     //카테고리 ID
     private Long categoryId;
 
+    //구독자 전용 여부
+    private boolean membership;
+
     //방송 시작 시간
     private Instant startTime;
 
@@ -66,6 +69,7 @@ public class LiveStream {
                       int likeCount,
                       int viewerCount,
                       Long categoryId,
+                      boolean membership,
                       Instant startTime,
                       Instant endTime) {
         this.id = id;
@@ -77,6 +81,7 @@ public class LiveStream {
         this.likeCount = likeCount;
         this.viewerCount = viewerCount;
         this.categoryId = categoryId;
+        this.membership = membership;
         this.startTime = startTime;
         this.endTime = endTime;
     }
@@ -94,5 +99,9 @@ public class LiveStream {
         this.viewerCount = viewerCount;
     }
 
+    // 구독자 전용 라이브인지 확인
+    public boolean isMembership() {
+        return this.membership;
+    }
 
 }

@@ -17,16 +17,19 @@ public class RequestAddLiveDto {
     private String buskerUuid;
     private String streamKey;
     private Long categoryId;
+    private boolean membership;
 
     @Builder
     public RequestAddLiveDto(String title,
                              String buskerUuid,
                              String streamKey,
-                             Long categoryId) {
+                             Long categoryId,
+                             boolean membership) {
         this.title = title;
         this.buskerUuid = buskerUuid;
         this.streamKey = streamKey;
         this.categoryId = categoryId;
+        this.membership = membership;
     }
 
     public static RequestAddLiveDto from(RequestAddLiveVo requestAddLiveVo, String buskerUuid, String streamKey) {
@@ -35,6 +38,7 @@ public class RequestAddLiveDto {
                 .buskerUuid(buskerUuid)
                 .streamKey(streamKey)
                 .categoryId(requestAddLiveVo.getCategoryId())
+                .membership(requestAddLiveVo.isMembership())
                 .build();
     }
 
@@ -46,9 +50,11 @@ public class RequestAddLiveDto {
                 .liveStreamStatus(LiveStreamStatus.ON_AIR)
                 .likeCount(0)
                 .viewerCount(0)
+                .categoryId(categoryId)
+                .membership(membership)
                 .startTime(Instant.now())
                 .build();
     }
 
-    }
+}
 

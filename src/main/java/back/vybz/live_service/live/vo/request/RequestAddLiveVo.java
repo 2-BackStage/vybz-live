@@ -10,12 +10,15 @@ public class RequestAddLiveVo {
 
     private String title;
     private Long categoryId;
+    private boolean membership;
 
     @Builder
     public RequestAddLiveVo(String title,
-                            Long categoryId) {
+                            Long categoryId,
+                            boolean membership) {
         this.title = title;
         this.categoryId = categoryId;
+        this.membership = membership;
     }
 
 }
