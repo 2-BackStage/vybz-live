@@ -23,10 +23,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(streamWebSocketHandler, "/ws/stream")
+        registry.addHandler(streamWebSocketHandler, "/ws-live/stream")
                 .setAllowedOrigins("*");
 
-        registry.addHandler(viewerWebSocketHandler, "/ws/viewer")
+        registry.addHandler(viewerWebSocketHandler, "/ws-live/viewer")
                 .setAllowedOrigins("*");
     }
 
