@@ -6,7 +6,7 @@ import jakarta.servlet.ServletContextListener;
 public class WebSocketBufferListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        sce.getServletContext().setInitParameter("org.apache.tomcat.websocket.textBufferSize", "524288");
-        sce.getServletContext().setInitParameter("org.apache.tomcat.websocket.binaryBufferSize", "524288");
+        sce.getServletContext().setInitParameter("org.apache.tomcat.websocket.textBufferSize", "4194304");
+        sce.getServletContext().setInitParameter("org.apache.tomcat.websocket.binaryBufferSize", "4194304");
     }
 }
