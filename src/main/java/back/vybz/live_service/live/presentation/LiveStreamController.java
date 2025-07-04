@@ -28,52 +28,35 @@ public class LiveStreamController {
     @Operation(summary = "라이브 스트림 시작 API", description = "버스커만 사용 가능", tags = {"LIVE-SERVICE"})
     @PostMapping("/start")
     public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(
-            @RequestHeader(value = "X-Busker-Id", required = false) String buskerUuid,
             @RequestBody RequestAddLiveVo requestAddLiveVo) {
 
-        if (buskerUuid == null || buskerUuid.isBlank()) {
-            throw new BaseException(BaseResponseStatus.UNAUTHORIZED);
-        }
-
-        log.info("🎬 [start] 컨트롤러 진입 - buskerUuid: {}", buskerUuid);
+        log.info("🎬 [start] 컨트롤러 진입");
         log.info("📦 RequestAddLiveVo: {}", requestAddLiveVo);
 
-        RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
-        ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
+        RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, null, null);
+        ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, null);
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());
     }
 
     @Operation(summary = "라이브 스트림 종료 API", description = "버스커만 사용 가능", tags = {"LIVE-SERVICE"})
     @PostMapping("/end")
     public BaseResponseEntity<Void> endLiveStream(
-            @RequestHeader(value = "X-Busker-Id", required = false) String buskerUuid,
             @RequestParam("streamKey") String streamKey) {
 
-        if (buskerUuid == null || buskerUuid.isBlank()) {
-            throw new BaseException(BaseResponseStatus.UNAUTHORIZED);
-        }
+        log.info("🛑 [end] 컨트롤러 진입 - streamKey: {}", streamKey);
 
-        log.info("🛑 [end] 컨트롤러 진입 - buskerUuid: {}, streamKey: {}", buskerUuid, streamKey);
-
-        liveStreamService.endLiveStream(buskerUuid, streamKey);
+        liveStreamService.endLiveStream(null, streamKey);
         return new BaseResponseEntity<>();
     }
 
     @Operation(summary = "라이브 스트림 입장 API", description = "유저/버스커 모두 입장 가능", tags = {"LIVE-SERVICE"})
     @GetMapping("/enter/{streamKey}")
     public BaseResponseEntity<LiveStreamResponseVo> enterLiveStream(
-            @RequestHeader(value = "X-User-Id", required = false) String viewerUuid,
-            @RequestHeader(value = "X-Busker-Id", required = false) String buskerUuid,
             @PathVariable("streamKey") String streamKey) {
 
-        String uuid = viewerUuid != null ? viewerUuid : buskerUuid;
-        if (uuid == null || uuid.isBlank()) {
-            throw new BaseException(BaseResponseStatus.UNAUTHORIZED);
-        }
+        log.info("🚪 [enter] 컨트롤러 진입 - streamKey: {}", streamKey);
 
-        log.info("🚪 [enter] 컨트롤러 진입 - streamKey: {}, uuid: {}", streamKey, uuid);
-
-        LiveStreamResponseDto liveStreamResponseDto = liveStreamService.getLiveStream(streamKey, uuid);
+        LiveStreamResponseDto liveStreamResponseDto = liveStreamService.getLiveStream(streamKey, null);
         return new BaseResponseEntity<>(liveStreamResponseDto.toVo());
     }
 
