@@ -28,24 +28,26 @@ public class LiveStreamController {
     @Operation(summary = "라이브 스트림 시작 API", description = "버스커만 사용 가능", tags = {"LIVE-SERVICE"})
     @PostMapping("/start")
     public BaseResponseEntity<ResponseAddLiveVo> createLiveStream(
+            @RequestHeader("X-Busker-Id") String buskerUuid,
             @RequestBody RequestAddLiveVo requestAddLiveVo) {
 
-        log.info("🎬 [start] 컨트롤러 진입");
+        log.info("🎬 [start] 컨트롤러 진입 - buskerUuid: {}", buskerUuid);
         log.info("📦 RequestAddLiveVo: {}", requestAddLiveVo);
 
-        RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, null, null);
-        ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, null);
+        RequestAddLiveDto requestAddLiveDto = RequestAddLiveDto.from(requestAddLiveVo, buskerUuid, null);
+        ResponseAddLiveDto responseAddLiveDto = liveStreamService.createLiveStream(requestAddLiveDto, buskerUuid);
         return new BaseResponseEntity<>(responseAddLiveDto.toVo());
     }
 
     @Operation(summary = "라이브 스트림 종료 API", description = "버스커만 사용 가능", tags = {"LIVE-SERVICE"})
     @PostMapping("/end")
     public BaseResponseEntity<Void> endLiveStream(
+            @RequestHeader("X-Busker-Id") String buskerUuid,
             @RequestParam("streamKey") String streamKey) {
 
-        log.info("🛑 [end] 컨트롤러 진입 - streamKey: {}", streamKey);
+        log.info("🛑 [end] 컨트롤러 진입 - buskerUuid: {}, streamKey: {}", buskerUuid, streamKey);
 
-        liveStreamService.endLiveStream(null, streamKey);
+        liveStreamService.endLiveStream(buskerUuid, streamKey);
         return new BaseResponseEntity<>();
     }
 
